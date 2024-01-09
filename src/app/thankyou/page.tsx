@@ -1,36 +1,41 @@
 "use client";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Thankyou() {
-  const [userInfo, setUserInfo] = useState({
-    firstName: "",
-    lastName: "",
-    coachineId: "",
-    mobile: "",
-    email: "",
-    userName: "",
-    referedUserName: "",
-    blank1: "",
-    blank2: "",
-    blank3: "",
-    blank4: "",
-    blank5: "",
-  });
+  const [userInfo, setUserInfo] = useState<any>({});
+  const [fields, setFields] = useState([]);
+  useEffect(() => {
+    getFields();
+  }, []);
+  const getFields = async () => {
+    const fields: any = await fetch("/api/send", {
+      method: "get",
+    });
+    const fieldsData = await fields.json();
+    const state: any = {};
+    if (fieldsData && fieldsData.fields && fieldsData.fields[0]) {
+      setFields(fieldsData.fields[0]);
+      for (let obj of fieldsData.fields[0]) {
+        state[obj.name] = "";
+      }
+    }
+    console.log();
+  };
   const sendEmail = async () => {
     try {
-      if (
-        !userInfo.firstName ||
-        !userInfo.lastName ||
-        !userInfo.coachineId ||
-        !userInfo.mobile ||
-        !userInfo.email ||
-        !userInfo.userName
-      ) {
-        alert("Please ender all details");
-        return false;
-      }
-      userInfo.referedUserName = location.search.split("=")[1]
+      // if (
+      //   !userInfo.firstName ||
+      //   !userInfo.lastName ||
+      //   !userInfo.coachineId ||
+      //   !userInfo.mobile ||
+      //   !userInfo.email ||
+      //   !userInfo.userName
+      // ) {
+      //   alert("Please ender all details");
+      //   return false;
+      // }
+      // userInfo.referedUserName = location.search.split("=")[1];
       const sendApi: any = await fetch("/api/send", {
         method: "post",
         body: JSON.stringify(userInfo),
@@ -46,31 +51,34 @@ export default function Thankyou() {
     }
     console.log();
   };
+
   return (
     <main className="flex min-h-screen mt-10">
       <form className="max-w-s">
-        <div className="md:flex md:items-center mb-6">
-          <div className="md:w-2/3">
-            <label className="mb-1 ml-5 md:mb-0 pr-4 block md:text-left text-gray-700 text-sm font-bold mb-2">
-              First Name
-            </label>
+        {fields.map((ob: any) => (
+          <div key={ob.id} className="md:flex md:items-center mb-6">
+            <div className="md:w-2/3">
+              <label className="mb-1 ml-5 md:mb-0 pr-4 block md:text-left text-gray-700 text-sm font-bold mb-2">
+                {ob.display_name}
+              </label>
+            </div>
+            <div className="md:w-2/3">
+              <input
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                id="inline-full-name"
+                type="text"
+                value={userInfo[ob.name]}
+                onChange={(e) => {
+                  setUserInfo({
+                    ...userInfo,
+                    [ob.name]: e.target.value,
+                  });
+                }}
+              />
+            </div>
           </div>
-          <div className="md:w-2/3">
-            <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="inline-full-name"
-              type="text"
-              value={userInfo.firstName}
-              onChange={(e) => {
-                setUserInfo({
-                  ...userInfo,
-                  firstName: e.target.value,
-                });
-              }}
-            />
-          </div>
-        </div>
-        <div className="md:flex md:items-center mb-6">
+        ))}
+        {/* <div className="md:flex md:items-center mb-6">
           <div className="md:w-2/3">
             <label className="mb-1 ml-5 md:mb-0 pr-4 block md:text-left text-gray-700 text-sm font-bold mb-2">
               Last Name
@@ -290,7 +298,7 @@ export default function Thankyou() {
             />
           </div>
         </div>
-
+*/}
         <div className="md:flex md:items-center">
           <div className="md:w-1/3"></div>
           <div className="md:w-2/3">
